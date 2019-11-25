@@ -1,128 +1,14 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# <div><p><!-- react-text: 7004 -->The <!-- /react-text -->first part<!-- /react-text --><!-- react-text: 7007 --> of this tutorial
-# covered the <!-- /react-text --><code>layout</code><!-- react-text: 7009 --> of Dash apps. The <!-- /react-text --><code>layout</code><!-- react-text: 7011 --> of a Dash app
-# describes what the app looks like.
-# It is a hierarchical tree of components.
-# The <!-- /react-text --><code>dash_html_components</code><!-- react-text: 7013 --> library provides classes for all of the HTML
-# tags and the keyword arguments describe the HTML attributes like <!-- /react-text --><code>style</code><!-- react-text: 7015 -->,
-# <!-- /react-text --><code>className</code><!-- react-text: 7017 -->, and <!-- /react-text --><code>id</code><!-- react-text: 7019 -->. The <!-- /react-text --><code>dash_core_components</code><!-- react-text: 7021 --> library
-# generates higher-level components like controls and graphs.<!-- /react-text --></p><p><!-- react-text: 7023 -->The second part of the tutorial describes how to make your
-# Dash apps interactive.<!-- /react-text --></p><p><!-- react-text: 7025 -->Let's get started with a simple example.<!-- /react-text --></p></div>
-
-# In[1]:
-
 
 import dash
-from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
-
-
-df = pd.read_csv(
-    'https://raw.githubusercontent.com/plotly/'
-    'datasets/master/gapminderDataFiveYear.csv')
 
 app = dash.Dash(__name__)
 server = app.server
+
 app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-
-app.layout = html.Div([
-    dcc.Graph(id='graph-with-slider'),
-    dcc.Slider(
-        id='year-slider',
-        min=df['year'].min(),
-        max=df['year'].max(),
-        value=df['year'].min(),
-        step=None,
-        marks={str(year): str(year) for year in df['year'].unique()}
-    )
-])
-
-@app.callback(
-    dash.dependencies.Output('graph-with-slider', 'figure'),
-    [dash.dependencies.Input('year-slider', 'value')])
-def update_figure(selected_year):
-    filtered_df = df[df.year == selected_year]
-    traces = []
-    for i in filtered_df.continent.unique():
-        df_by_continent = filtered_df[filtered_df['continent'] == i]
-        traces.append(go.Scatter(
-            x=df_by_continent['gdpPercap'],
-            y=df_by_continent['lifeExp'],
-            text=df_by_continent['country'],
-            mode='markers',
-            opacity=0.7,
-            marker={
-                'size': 15,
-                'line': {'width': 0.5, 'color': 'white'}
-            },
-            name=i
-        ))
-
-    return {
-        'data': traces,
-        'layout': go.Layout(
-            xaxis={'type': 'log', 'title': 'GDP Per Capita'},
-            yaxis={'title': 'Life Expectancy', 'range': [20, 90]},
-            margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
-            legend={'x': 0, 'y': 1},
-            hovermode='closest'
-        )
-    }
-
-if __name__ == '__main__':
-    app.run_server()
-
-
-# <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-# 
-# [http://localhost:8050](http://localhost:8050)
-# 
-# Press  <i class="fa fa-stop"></i>  in the tool bar before execute the next cell
-
-# <div><p><!-- react-text: 7416 -->In this example, the <!-- /react-text --><code>"value"</code><!-- react-text: 7418 --> property of the <!-- /react-text --><code>Slider</code><!-- react-text: 7420 --> is the input of the app
-# and the output of the app is the <!-- /react-text --><code>"figure"</code><!-- react-text: 7422 --> property of the <!-- /react-text --><code>Graph</code><!-- react-text: 7424 -->.
-# Whenever the <!-- /react-text --><code>value</code><!-- react-text: 7426 --> of the <!-- /react-text --><code>Slider</code><!-- react-text: 7428 --> changes, Dash calls the callback
-# function <!-- /react-text --><code>update_figure</code><!-- react-text: 7430 --> with the new value. The function filters the
-# dataframe with this new value, constructs a <!-- /react-text --><code>figure</code><!-- react-text: 7432 --> object,
-# and returns it to the Dash application.<!-- /react-text --></p><p><!-- react-text: 7434 -->There are a few nice patterns in this example:<!-- /react-text --></p><ol><li><!-- react-text: 7437 -->We're using the <!-- /react-text --><a href="http://pandas.pydata.org/"><!-- react-text: 7439 -->Pandas<!-- /react-text --></a><!-- react-text: 7440 --> library for importing
-# and filtering datasets in memory.<!-- /react-text --></li><li><!-- react-text: 7442 -->We load our dataframe at the start of the app: <!-- /react-text --><code>df = pd.read_csv('...')</code><!-- react-text: 7444 -->.
-# This dataframe <!-- /react-text --><code>df</code><!-- react-text: 7446 --> is in the global state of the app and can be
-# read inside the callback functions.<!-- /react-text --></li><li><!-- react-text: 7448 -->Loading data into memory can be expensive. By loading querying data at
-# the start of the app instead of inside the callback functions, we ensure
-# that this operation is only done when the app server starts. When a user
-# visits the app or interacts with the app, that data (the <!-- /react-text --><code>df</code><!-- react-text: 7450 -->)
-# is already in memory.
-# If possible, expensive initialization (like downloading or querying data)
-# should be done in the global scope of the app instead of within the
-# callback functions.<!-- /react-text --></li><li><!-- react-text: 7452 -->The callback does not modify the original data, it just creates copies
-# of the dataframe by filtered through pandas filters.
-# This is important: <!-- /react-text --><em><!-- react-text: 7454 -->your callbacks should never mutate variables
-# outside of their scope<!-- /react-text --></em><!-- react-text: 7455 -->. If your callbacks modify global state, then one
-# user's session might affect the next user's session and when the app is
-# deployed on multiple processes or threads, those modifications will not
-# be shared across sessions.<!-- /react-text --></li></ol><h4>Multiple inputs</h4><p><!-- react-text: 7458 -->In Dash any "<!-- /react-text --><code>Output</code><!-- react-text: 7460 -->" can have multiple "<!-- /react-text --><code>Input</code><!-- react-text: 7462 -->" components.
-# Here's a simple example that binds 5 Inputs
-# (the <!-- /react-text --><code>value</code><!-- react-text: 7464 --> property of 2 <!-- /react-text --><code>Dropdown</code><!-- react-text: 7466 --> components, 2 <!-- /react-text --><code>RadioItems</code><!-- react-text: 7468 --> components,
-# and 1 <!-- /react-text --><code>Slider</code><!-- react-text: 7470 --> component) to 1 Output component
-# (the <!-- /react-text --><code>figure</code><!-- react-text: 7472 --> property of the <!-- /react-text --><code>Graph</code><!-- react-text: 7474 --> component).
-# Notice how the <!-- /react-text --><code>app.callback</code><!-- react-text: 7476 --> lists all 5 <!-- /react-text --><code>dash.dependencies.Input</code><!-- react-text: 7478 --> inside
-# a list in the second argument.<!-- /react-text --></p></div>
-
-# In[3]:
-
-
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-import plotly.graph_objs as go
-import pandas as pd
-
-app = dash.Dash()
 
 df = pd.read_csv(
     'https://gist.githubusercontent.com/chriddyp/'
