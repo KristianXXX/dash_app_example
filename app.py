@@ -18,74 +18,17 @@ import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-
-app = dash.Dash(__name__)
-server = app.server
-app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-
-app.layout = html.Div([
-    dcc.Input(id='my-id', value='initial value', type="text"),
-    html.Div(id='my-div')
-])
-
-@app.callback(
-    Output(component_id='my-div', component_property='children'),
-    [Input(component_id='my-id', component_property='value')]
-)
-def update_output_div(input_value):
-    return 'You\'ve entered. WOW!!! "{}"'.format(input_value)
-
-if __name__ == '__main__':
-    app.run_server()
-
-
-# <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-# 
-# [http://localhost:8050](http://localhost:8050)
-# 
-# Press  <i class="fa fa-stop"></i>  in the tool bar before execute the next cell
-
-# <div><p><!-- react-text: 7105 -->Try typing in the text box. The children of the output component updates
-# right away. Let's break down what's happening here:<!-- /react-text --></p><ol><li><!-- react-text: 7108 -->The "inputs" and "outputs" of our application interface are described
-# declaratively through the <!-- /react-text --><code>app.callback</code><!-- react-text: 7110 --> decorator.<!-- /react-text --></li><li><!-- react-text: 7112 -->In Dash, the inputs and outputs of our application are simply the
-# properties of a particular component. In this example,
-# our input is the "<!-- /react-text --><code>value</code><!-- react-text: 7114 -->" property of the component that has the ID
-# "<!-- /react-text --><code>my-id</code><!-- react-text: 7116 -->". Our output is the "<!-- /react-text --><code>children</code><!-- react-text: 7118 -->" property of the
-# component with the ID "<!-- /react-text --><code>my-div</code><!-- react-text: 7120 -->".<!-- /react-text --></li><li><!-- react-text: 7122 -->Whenever an input property changes, the function that the
-# callback decorator wraps will get called automatically.
-# Dash provides the function with the new value of the input property as
-# an input argument and Dash updates the property of the output component
-# with whatever was returned by the function.<!-- /react-text --></li><li><!-- react-text: 7130 -->Don't confuse the <!-- /react-text --><code>dash.dependencies.Input</code><!-- react-text: 7132 --> object from the
-# <!-- /react-text --><code>dash_core_components.Input</code><!-- react-text: 7134 --> object. The former is just used in these
-# callbacks and the latter is an actual component.<!-- /react-text --></li><li><!-- react-text: 7136 -->Notice how we don't set a value for the <!-- /react-text --><code>children</code><!-- react-text: 7138 --> property of the
-# <!-- /react-text --><code>my-div</code><!-- react-text: 7140 --> component in the <!-- /react-text --><code>layout</code><!-- react-text: 7142 -->. When the Dash app starts, it
-# automatically calls all of the callbacks with the initial values of the
-# input components in order to populate the initial state of the output
-# components. In this example, if you specified something like
-# <!-- /react-text --><code>html.Div(id='my-div', children='Hello world')</code><!-- react-text: 7144 -->, it would get overwritten
-# when the app starts.<!-- /react-text --></li></ol><p><!-- react-text: 7148 -->Remember how every component was described entirely through its set of
-# keyword arguments? Those properties are important now.
-# With Dash interactivity, we can dynamically update any of those properties
-# through a callback function. Frequently we'll update the <!-- /react-text --><code>children</code><!-- react-text: 7150 --> of a
-# component to display new text or the <!-- /react-text --><code>figure</code><!-- react-text: 7152 --> of a <!-- /react-text --><code>dcc.Graph</code><!-- react-text: 7154 --> component
-# to display new data, but we could also update the <!-- /react-text --><code>style</code><!-- react-text: 7156 --> of a component or
-# even the available <!-- /react-text --><code>options</code><!-- react-text: 7158 --> of a <!-- /react-text --><code>dcc.Dropdown</code><!-- react-text: 7160 --> component!<!-- /react-text --></p><hr><p><!-- react-text: 7163 -->Let's take a look at another example where a <!-- /react-text --><code>dcc.Slider</code><!-- react-text: 7165 --> updates a
-# <!-- /react-text --><code>dcc.Graph</code><!-- react-text: 7167 -->.<!-- /react-text --></p></div>
-
-# In[2]:
-
-
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
+
 
 df = pd.read_csv(
     'https://raw.githubusercontent.com/plotly/'
     'datasets/master/gapminderDataFiveYear.csv')
 
-app = dash.Dash()
+app = dash.Dash(__name__)
+server = app.server
+app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
 
 app.layout = html.Div([
     dcc.Graph(id='graph-with-slider'),
